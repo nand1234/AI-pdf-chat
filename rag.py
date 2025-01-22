@@ -7,7 +7,7 @@ def run_rag(question):
     llm = HuggingFaceEndpoint(
         repo_id="mistralai/Mistral-7B-Instruct-v0.2",  # Example model; replace with your desired model
         task="text-generation",
-        max_new_tokens=512,
+        max_new_tokens=2096,
         do_sample=False,
         repetition_penalty=1.03,
     )

@@ -2,3 +2,5 @@
 venv
 chroma.sqlite3
 langchain
+sample_pdf/invoice.pdf
+__pycache__
