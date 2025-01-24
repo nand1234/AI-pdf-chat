@@ -4,7 +4,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain.schema import Document  # Adjust import based on your library
 import tempfile
-import io
+import io, os
 
 
 
@@ -30,7 +30,8 @@ def document_exists(new_documents, vectorstore):
     return False
 
 
-def load_pdf(pdf):
+def load_pdf(pdf, pdf_name):
+    
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file.write(pdf.read())
         temp_file_path = temp_file.name  # Get the temporary file path
@@ -40,6 +41,11 @@ def load_pdf(pdf):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=500)
     all_splits = text_splitter.split_documents(data)
 
+    # Add metadata (PDF name) to each document chunk
+    for split in all_splits:
+        split.metadata['source'] = os.path.basename(pdf_name)
+
+
     local_embidding = HuggingFaceEmbeddings()
 
     vectorstore = Chroma(persist_directory=DB_dir, embedding_function=local_embidding)
@@ -47,15 +53,20 @@ def load_pdf(pdf):
     # Check for duplicates before inserting
     if not document_exists(all_splits, vectorstore):
         Chroma.from_documents(documents=all_splits, embedding=local_embidding, persist_directory=DB_dir)
+        print(f"Successfully added {pdf_name} to the vector store.")
     else:
-        print("Document already exists in the vector store. Skipping insertion.")
-def get_context(question):
+        print(f"{pdf_name} already exists in the vector store. Skipping insertion.")
+        
+def get_context(question, pdf_name):
     local_embidding = HuggingFaceEmbeddings()
     vectorstore = Chroma(persist_directory=DB_dir, embedding_function=local_embidding)
     docs = vectorstore.similarity_search(question, k=3)
+    #print(docs)
+    filtered_docs = [doc for doc in docs if doc.metadata.get('source') == os.path.basename(pdf_name)]
     combined_page_content = ""
     combined_metadata = {}
-    for doc in docs:
+
+    for _, doc in enumerate(filtered_docs):
         # Safely retrieve and concatenate page_content
         if hasattr(doc, 'page_content') and doc.page_content:
             combined_page_content += doc.page_content + "\n\n"
@@ -74,14 +85,14 @@ def get_context(question):
     )
 
 if __name__ == '__main__':
-    uploaded_file = 'sample_pdf/Employee Handbook_Final_20.12.2022.pdf'
+    uploaded_file_name = 'sample_pdf/invoice.pdf'
     # Open the file in binary mode and read its content
-    with open(uploaded_file, 'rb') as f:
+    with open(uploaded_file_name, 'rb') as f:
          pdf_data = f.read()
     # Convert byte data to a file-like object using io.BytesIO
     pdf_file = io.BytesIO(pdf_data)
     
     # Extract text from the uploaded PDF
-    load_pdf(pdf_file)
-    doc = get_context('whats is this CV about?')
-    #print(doc)
+    load_pdf(pdf_file, uploaded_file_name)
+    doc = get_context('fetch me invoice details', uploaded_file_name)
+    print(doc)

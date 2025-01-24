@@ -1,8 +1,8 @@
 from langchain_huggingface import HuggingFaceEndpoint
-from embidding import get_context
+from embedding import get_context
 
 
-def run_rag(question):
+def run_rag(question, file_name):
     # Step 6: Use a HuggingFace model to answer the question based on the retrieved documents
     llm = HuggingFaceEndpoint(
         repo_id="mistralai/Mistral-7B-Instruct-v0.2",  # Example model; replace with your desired model
@@ -13,9 +13,9 @@ def run_rag(question):
     )
 
     # Generate an answer using the documents retrieved from the vector store
-    docs = get_context(question)  # Get the relevant document text
+    docs = get_context(question, file_name)  # Get the relevant document text
     context = docs #
-    #print(context)
+    print(context)
 
     # Construct the system and user prompt with clear instructions
     # Construct the system and user prompts

@@ -1,6 +1,6 @@
 import streamlit as st
 from rag import run_rag
-from embidding import load_pdf
+from embedding import load_pdf
 import io
 # Initialize the LLM (example with OpenAI)
 
@@ -20,7 +20,7 @@ if uploaded_file is not None:
     pdf_file = io.BytesIO(byte_data)
     
     # Extract text from the uploaded PDF
-    load_pdf(pdf_file)
+    load_pdf(pdf_file, uploaded_file.name)
     st.success(f"sucessfully save PDF document in chroma DB in vector format: {uploaded_file.name}") 
 
     # Display the extracted text
@@ -30,7 +30,7 @@ if st.button("Get Answer"):
     if user_question.strip():
         try:
             # Use the LLM to predict an answer based on the user question and reference document
-            response = run_rag(user_question)
+            response = run_rag(user_question, uploaded_file.name)
             
             # Display the result
             st.success("Answer:") 
