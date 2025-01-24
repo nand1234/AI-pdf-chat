@@ -21,6 +21,13 @@ def load_documents(url: str = "https://lilianweng.github.io/posts/2023-06-23-age
 
     Chroma.from_documents(documents=all_splits, embedding=local_embidding, persist_directory=DB_dir)
     
+def document_exists(new_documents, vectorstore):
+    for doc in new_documents:
+        # Perform similarity search for each split
+        results = vectorstore.similarity_search(doc.page_content, k=1)
+        if results and results[0].page_content == doc.page_content:
+            return True  # Document already exists
+    return False
 
 
 def load_pdf(pdf):
@@ -35,8 +42,13 @@ def load_pdf(pdf):
 
     local_embidding = HuggingFaceEmbeddings()
 
-    Chroma.from_documents(documents=all_splits, embedding=local_embidding, persist_directory=DB_dir)
+    vectorstore = Chroma(persist_directory=DB_dir, embedding_function=local_embidding)
 
+    # Check for duplicates before inserting
+    if not document_exists(all_splits, vectorstore):
+        Chroma.from_documents(documents=all_splits, embedding=local_embidding, persist_directory=DB_dir)
+    else:
+        print("Document already exists in the vector store. Skipping insertion.")
 def get_context(question):
     local_embidding = HuggingFaceEmbeddings()
     vectorstore = Chroma(persist_directory=DB_dir, embedding_function=local_embidding)
@@ -62,7 +74,7 @@ def get_context(question):
     )
 
 if __name__ == '__main__':
-    uploaded_file = 'sample_pdf/Nandkumar_Ghatage_Latest_CV.pdf'
+    uploaded_file = 'sample_pdf/Employee Handbook_Final_20.12.2022.pdf'
     # Open the file in binary mode and read its content
     with open(uploaded_file, 'rb') as f:
          pdf_data = f.read()
@@ -72,4 +84,4 @@ if __name__ == '__main__':
     # Extract text from the uploaded PDF
     load_pdf(pdf_file)
     doc = get_context('whats is this CV about?')
-    print(doc)
+    #print(doc)

@@ -21,7 +21,7 @@ if uploaded_file is not None:
     
     # Extract text from the uploaded PDF
     load_pdf(pdf_file)
-    st.success("sucessfully save PDF document in chroma DB in vector format: {uploaded_file.name}") 
+    st.success(f"sucessfully save PDF document in chroma DB in vector format: {uploaded_file.name}") 
 
     # Display the extracted text
 
