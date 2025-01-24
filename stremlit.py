@@ -20,8 +20,8 @@ if uploaded_file is not None:
     pdf_file = io.BytesIO(byte_data)
     
     # Extract text from the uploaded PDF
-    load_pdf(pdf_file, uploaded_file.name)
-    st.success(f"sucessfully save PDF document in chroma DB in vector format: {uploaded_file.name}") 
+    status: str =  load_pdf(pdf_file, uploaded_file.name)
+    st.success(f"{status}") 
 
     # Display the extracted text
 

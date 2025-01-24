@@ -53,9 +53,9 @@ def load_pdf(pdf, pdf_name):
     # Check for duplicates before inserting
     if not document_exists(all_splits, vectorstore):
         Chroma.from_documents(documents=all_splits, embedding=local_embidding, persist_directory=DB_dir)
-        print(f"Successfully added {pdf_name} to the vector store.")
+        return(f"Successfully added {pdf_name} to the vector store.")
     else:
-        print(f"{pdf_name} already exists in the vector store. Skipping insertion.")
+        return(f"{pdf_name} already exists in the vector store. Skipping insertion.")
         
 def get_context(question, pdf_name):
     local_embidding = HuggingFaceEmbeddings()
